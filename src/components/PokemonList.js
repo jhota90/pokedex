@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 class PokemonList extends Component {
 
     constructor() {
         super();
         this.state = {
-            loading: true,
-            pokemons: []
+            loading: false,
+            pokemons: [],
+            newUrl: ''
         }
         this.selectPokemon = this.selectPokemon.bind(this);
     }
@@ -16,46 +18,63 @@ class PokemonList extends Component {
     }
 
     componentDidMount() {
+        this.fetchMorePokemons();
+    }
+
+    fetchMorePokemons = () => {
+        if (this.state.loading) {
+            return;
+        }
+
         this.setState({
             loading: true,
         });
-        fetch("https://pokeapi.co/api/v2/pokemon/")
+        let url = "https://pokeapi.co/api/v2/pokemon/";
+        if (this.state.newUrl !== '') {
+            url = this.state.newUrl;
+        }
+
+        fetch(url)
             .then(res => res.json())
             .then((result) => {
                 this.setState({
                     loading: false,
-                    pokemons: result.results
+                    pokemons: this.state.pokemons.concat(result.results),
+                    newUrl: result.next
                 });
             },
-            (error) => {
-                this.setState({
-                    loading: false                    
-                });
-            }
-        );
-    }
+                (error) => {
+                    console.log(error);
+                }
+            );
+    };
 
     render() {
-        const pokemons = this.state.pokemons.map((a_pokemon, i) => {
-            return (
-                <div className="col-3" key={i}>
-                    <div className="card mt-4">
-                        <div className="card-header text-capitalize">
-                            <h5>{a_pokemon.name}</h5>
-                        </div>
-                        <div className="card-footer">
-                            <button className="btn btn-md btn-info" onClick={() => this.selectPokemon(i)}>
-                                Ver
-                            </button>
+        return (
+            <InfiniteScroll
+            dataLength={this.state.pokemons.length}
+            next={this.fetchMorePokemons}
+            hasMore={true}
+            loader={<h4>Cargando...</h4>}
+            scrollableTarget={this.props.onScrollableTarget}
+            >
+                {this.state.pokemons.map((a_pokemon, index) => (
+                    <div className="card mt-2" key={index}>
+                        <div className="card-body">
+                            <div className="row">
+                                <div className="col-10 text-left text-capitalize">
+                                    <h5>{a_pokemon.name}</h5>
+                                </div>
+                                <div className="col-2">
+                                    <button className="btn btn-md btn-info" onClick={() => this.selectPokemon(index)}>
+                                        Ver
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            );
-        });
-        return (
-            <div className="row">
-                {pokemons}
-            </div>
+                ))}
+            </InfiniteScroll>
         );
     }
 }

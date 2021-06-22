@@ -1,4 +1,4 @@
 .pokemon-list {
-    overflow-y: auto;
-    height: 600px;
+    overflow: auto;
+    height: 400px;
 }
