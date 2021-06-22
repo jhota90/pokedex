@@ -22,10 +22,12 @@ class App extends Component {
   }
 
   filtrarPokemon(e) {
-    const { name, value } = e.target;
-    this.setState({
-      [name]: value
-    });
+    const { value } = e.target;
+    if (value !== '') {
+      this.setState({
+        pokemonUrlSelected: "https://pokeapi.co/api/v2/pokemon/" + value
+      });
+    }
   }
 
   render() {
@@ -43,7 +45,7 @@ class App extends Component {
             <PokemonList onSelectPokemon={this.selectPokemon} onScrollableTarget="pokemon-list" />
           </div>
           <div className="col-md-4">
-            <PokemonDetail pokemonUrl={this.state.pokemonUrlSelected} filtroPokemon={this.state.filtroPokemon} />
+            <PokemonDetail pokemonUrl={this.state.pokemonUrlSelected} />
           </div>
         </div>
       </div>
